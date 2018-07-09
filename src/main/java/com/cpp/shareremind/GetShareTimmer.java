@@ -39,16 +39,13 @@ public class GetShareTimmer {
     @Autowired
     ShareHoldDao shareHoldDao;
 
-    private JPushClient jpushClient;
-    private SimpleDateFormat dateFormat;
+    private JPushClient jpushClient = new JPushClient("82df7160317edfa2271edd9b", "640c29b3fbadf5b32a862c67", null, ClientConfig.getInstance());
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("hhmm");
     private Gson gson = new Gson();
 
-
-    @PostConstruct
-    public void init() {
-        jpushClient = new JPushClient("82df7160317edfa2271edd9b", "640c29b3fbadf5b32a862c67", null, ClientConfig.getInstance());
-        dateFormat = new SimpleDateFormat("hhmm");
-    }
+    /**
+     * sh000001 上证指数
+     */
 
 
     //    @Scheduled(fixedRate = 10000)

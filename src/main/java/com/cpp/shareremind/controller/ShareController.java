@@ -5,16 +5,16 @@ import com.cpp.shareremind.model.ShareHoldNow;
 import com.cpp.shareremind.model.ShareValue;
 import com.cpp.shareremind.dao.ShareHoldDao;
 import com.cpp.shareremind.dao.ShareValueDao;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 
+@Api
 @RestController
 public class ShareController {
 
@@ -25,7 +25,7 @@ public class ShareController {
     ShareValueDao shareValueDao;
 
 
-    @GetMapping("/getCurrentState")
+    @GetMapping(path = "/getCurrentState")
     public Object getCurrentState() {
         List<ShareHold> all = shareHoldDao.findAll();
         Double costTotalAll = 0d;
