@@ -8,6 +8,9 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface ShareHoldDao extends JpaRepository<ShareHold, Integer> {
+
+    @Modifying
+    @Transactional
     void deleteByCode(String code);
 
     @Modifying

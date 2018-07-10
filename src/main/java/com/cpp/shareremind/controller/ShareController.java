@@ -1,16 +1,19 @@
 package com.cpp.shareremind.controller;
 
-import com.cpp.shareremind.model.ShareHold;
-import com.cpp.shareremind.model.ShareHoldNow;
-import com.cpp.shareremind.model.ShareValue;
+import com.cpp.shareremind.ApiResonse;
 import com.cpp.shareremind.dao.ShareHoldDao;
 import com.cpp.shareremind.dao.ShareValueDao;
+import com.cpp.shareremind.model.ShareHold;
+import com.cpp.shareremind.model.ShareHoldNow;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -68,20 +71,29 @@ public class ShareController {
     @GetMapping("/deleteHoldByCode")
     public Object deleteHoldByCode(String code) {
         shareHoldDao.deleteByCode(code);
-        return "ok";
+        return ApiResonse.success();
     }
 
     @GetMapping("/deleteAllHolds")
     public Object deleteAllHolds() {
         shareHoldDao.deleteAll();
-        return "ok";
+        return ApiResonse.success();
     }
 
     @PostMapping("/saveHold")
     public Object addOneHold(@RequestBody ShareHold shareHold) {
-        shareHoldDao.save(shareHold);
-        return "ok";
+        if (shareHold.getId() == null) {
+            shareHold.setBuyDate(new Date());
+            shareHoldDao.save(shareHold);
+        } else {
+            ShareHold shareHoldOld = shareHoldDao.findById(shareHold.getId()).get();
+            shareHoldOld.setCost(shareHold.getCost());
+            shareHoldOld.setShare(shareHold.getShare());
+            shareHoldOld.setExpectPrice(shareHold.getExpectPrice());
+            shareHoldOld.setExpectTotal(shareHold.getExpectTotal());
+            shareHoldOld.setExpectProfit(shareHold.getExpectProfit());
+            shareHoldDao.save(shareHoldOld);
+        }
+        return ApiResonse.success();
     }
-
-
 }

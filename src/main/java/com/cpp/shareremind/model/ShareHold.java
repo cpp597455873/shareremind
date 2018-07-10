@@ -10,7 +10,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 public class ShareHold {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
     private String name;
     @Column(unique = true)
     private String code;
@@ -109,11 +109,11 @@ public class ShareHold {
         this.lastNotifyTime = lastNotifyTime;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
