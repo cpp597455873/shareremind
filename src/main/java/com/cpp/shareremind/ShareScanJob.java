@@ -4,7 +4,6 @@ import cn.jiguang.common.ClientConfig;
 import cn.jiguang.common.resp.APIConnectionException;
 import cn.jiguang.common.resp.APIRequestException;
 import cn.jpush.api.JPushClient;
-import cn.jpush.api.push.PushResult;
 import cn.jpush.api.push.model.Message;
 import cn.jpush.api.push.model.Platform;
 import cn.jpush.api.push.model.PushPayload;
@@ -22,12 +21,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
-public class GetShareTimmer {
+public class ShareScanJob {
 
     @Autowired
     private OkHttpClient okHttpClient;
@@ -43,51 +44,34 @@ public class GetShareTimmer {
     private SimpleDateFormat dateFormat = new SimpleDateFormat("hhmm");
     private Gson gson = new Gson();
 
-    /**
-     * sh000001 上证指数
-     */
-
-
-    //    @Scheduled(fixedRate = 10000)
-    public void insertData() {
-        List<ShareHold> shares = shareHoldDao.findAll();
-        customMessage(ACTION_PRICE, gson.toJson(shares));
-    }
-
     public static final String ACTION_PRICE = "action_price";
 
-
-//    @Scheduled(cron = "*/10 * 9,10,11,13,14 * * MON-FRI")
-//    public void pushPrice() {
-//    }
-
-
+    /**
+     * 刷新股价
+     */
     @Scheduled(cron = "*/10 * 9,10,11,13,14 * * MON-FRI")
-    public void getNowPrice() {
+    public void refreshSharePrice() {
         Integer now = Integer.valueOf(dateFormat.format(new Date()));
         if (now > 1130 && now < 1300) {
             return;
         }
-        double total = 0d;
         List<ShareHold> shares = shareHoldDao.findAll();
         for (ShareHold share : shares) {
-            total += getOneShare(share);
+            getOneShare(share);
         }
         customMessage(ACTION_PRICE, gson.toJson(shares));
     }
 
     private void notifyMe(String title, String content, Object data) {
         try {
-            JPushClient jpushClient = new JPushClient("82df7160317edfa2271edd9b", "640c29b3fbadf5b32a862c67", null, ClientConfig.getInstance());
-            PushPayload pushPayload = buildPushObject_android_tag_alertWithTitle(title, content, data);
-            PushResult pushResult = jpushClient.sendPush(pushPayload);
-            System.out.println(pushResult);
+            PushPayload pushPayload = buildAlertPushPayLoad(title, content, data);
+            jpushClient.sendPush(pushPayload);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private double getOneShare(ShareHold share) {
+    private void getOneShare(ShareHold share) {
         try {
             String code = share.getCode();
             String url = "https://hq.finance.ifeng.com/q.php?l=" + code;
@@ -118,11 +102,9 @@ public class GetShareTimmer {
             }
             shareValueDao.insert(new ShareValue(code, now, new Date()));
             shareHoldDao.updateShareHoldNowPrice(code, now);
-            return earn;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return 0d;
     }
 
     private void notifyMe(String title, ShareHold share) {
@@ -131,7 +113,7 @@ public class GetShareTimmer {
                 (share.getNowPrice() - share.getCost()) * share.getShare(), share);
     }
 
-    public static PushPayload buildPushObject_android_tag_alertWithTitle(String title, String content, Object data) {
+    public static PushPayload buildAlertPushPayLoad(String title, String content, Object data) {
         HashMap<String, String> extras = new HashMap<>();
         if (data != null) {
             String s = new Gson().toJson(data);
